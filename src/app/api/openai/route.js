@@ -22,11 +22,13 @@ export async function POST(req) {
     const { formattedPrompt } = body
     console.log('Formatted prompt:', formattedPrompt)
 
-    const completion = await openai.chat.completions.create({
-      messages: [
-        { role: 'system', content: 'You are a helpful assistant.' },
-        { role: 'user', content: formattedPrompt },
-      ],
+    // Add timeout handling
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Request timed out')), 45000)
+    )
+
+    const completionPromise = openai.chat.completions.create({
+      messages: [{ role: 'user', content: formattedPrompt }],
       model: 'gpt-4',
       temperature: 0.7,
       max_tokens: 1000,
@@ -58,23 +60,34 @@ export async function POST(req) {
       function_call: { name: 'createJourneySteps' },
     })
 
+    const completion = await Promise.race([completionPromise, timeout])
+    console.log('OpenAI Response:', completion)
+
     const functionCall = completion.choices[0]?.message?.function_call
     if (!functionCall?.arguments) {
+      console.error('Invalid response:', completion)
       throw new Error('Invalid response format from OpenAI')
     }
 
-    const { journeySteps, responseTitle } = JSON.parse(functionCall.arguments)
+    try {
+      const { journeySteps, responseTitle } = JSON.parse(functionCall.arguments)
+      console.log('Parsed Journey Steps:', journeySteps)
 
-    if (!journeySteps?.length) {
-      throw new Error('No journey steps in response')
+      if (!journeySteps?.length) {
+        throw new Error('No journey steps in response')
+      }
+
+      return NextResponse.json({
+        data: journeySteps.map((step) => ({
+          ...step,
+          responseTitle,
+        })),
+      })
+    } catch (parseError) {
+      console.error('Parsing error:', parseError)
+      console.error('Function arguments:', functionCall.arguments)
+      throw new Error('Failed to parse OpenAI response')
     }
-
-    return NextResponse.json({
-      data: journeySteps.map((step) => ({
-        ...step,
-        responseTitle,
-      })),
-    })
   } catch (error) {
     console.error('API Error:', error)
 
@@ -83,6 +96,10 @@ export async function POST(req) {
         { error: 'OpenAI API error', details: error.message },
         { status: 502 }
       )
+    }
+
+    if (error.name === 'AbortError') {
+      return NextResponse.json({ error: 'Request timed out' }, { status: 504 })
     }
 
     return NextResponse.json(
