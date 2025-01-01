@@ -3,6 +3,7 @@ import { JourneyStep } from '@/lib/types'
 import CustomerJourneyGenerator from '@/components/JourneyForm'
 
 import { JourneyFormData } from '@/lib/types'
+import CsvDownloadButton from './CsvDownloadButton'
 
 interface JourneyDisplayProps {
   journeySteps: JourneyStep[]
@@ -41,6 +42,9 @@ export default function JourneyDisplay({
                 <p className="text-gray-600">{step.description}</p>
               </Card>
             ))}
+          </div>
+          <div className="flex justify-center mt-4 max-w-2xl mx-auto">
+            <CsvDownloadButton journeySteps={journeySteps} />
           </div>
         </div>
       )}
