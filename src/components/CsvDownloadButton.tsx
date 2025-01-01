@@ -37,8 +37,8 @@ export default function CsvDownloadButton({
   return (
     <Button
       onClick={handleDownload}
-      variant="outline"
-      size="sm"
+      variant="default"
+      size="lg"
       className="gap-2"
     >
       <Download className="h-4 w-4" />

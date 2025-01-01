@@ -92,7 +92,7 @@ export default function JourneyForm({
           <div className="mt-6">
             <Button
               type="submit"
-              className="bg-black text-white hover:bg-black/90"
+              className="bg-black text-white hover:bg-black/80"
               disabled={isLoading}
             >
               {isLoading ? 'Generating...' : 'Generate Journey'}
