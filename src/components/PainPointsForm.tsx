@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button'
 
 export default function PainPointsForm() {
   return (
-    <div className="flex gap-4 w-full">
-      <Card className="flex-1 p-6">
+    <div className="flex flex-col md:flex-row gap-4 w-full md:p-0">
+      <Card className="w-full md:flex-1 p-6">
         <div className="space-y-6">
           <div>
             <h2 className="text-lg font-semibold">Customer Pain Points</h2>
@@ -16,7 +16,7 @@ export default function PainPointsForm() {
         </div>
       </Card>
 
-      <Card className="flex-1 p-6">
+      <Card className="w-full md:flex-1 p-6">
         <div className="space-y-6">
           <div>
             <h2 className="text-lg font-semibold">Business Pain Points</h2>

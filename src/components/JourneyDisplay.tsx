@@ -100,7 +100,7 @@ export default function JourneyDisplay({
 
       {error && (
         <div className="mt-6">
-          <Card>
+          <Card className="bg-red-50 p-4">
             <p className="text-red-600">{error}</p>
           </Card>
         </div>
