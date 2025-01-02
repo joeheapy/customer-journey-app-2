@@ -100,7 +100,7 @@ export default function JourneyDisplay({
 
       {error && (
         <div className="mt-6">
-          <Card className="bg-red-50 p-4">
+          <Card>
             <p className="text-red-600">{error}</p>
           </Card>
         </div>
@@ -126,7 +126,7 @@ export default function JourneyDisplay({
                       />
                     ) : (
                       <h3 className="font-medium">
-                        Step {step.step}: {step.title}
+                        {step.step}: {step.title}
                       </h3>
                     )}
                   </div>
