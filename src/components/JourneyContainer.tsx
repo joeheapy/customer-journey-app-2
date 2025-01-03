@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { JourneyFormData, JourneyStep } from '@/lib/types'
-import JourneyDisplay from '@/components/JourneyDisplay'
+import { JourneyDisplay } from '@/components/JourneyDisplay'
 
 interface JourneyContainerProps {
   onJourneyGenerated: (steps: JourneyStep[]) => void
@@ -51,13 +51,14 @@ export default function JourneyContainer({
   const createPrompt = (inputs: JourneyFormData) => {
     return `You are a world-class customer experience designer with expertise in journey mapping and service design. Create a comprehensive customer journey for a ${inputs.target_customers} named ${inputs.persona_name} who is exploring ${inputs.business_proposition} products and services. Context: ${inputs.persona_name} has ${inputs.customer_scenario}. Map out a detailed end-to-end journey in 10 key stages, from initial awareness through service usage to post-service relationship management. Define a clear title that captures the key interaction or emotional state. Describe the customer's actions, thoughts, and feelings. Identify key touchpoints and channels. Focus on creating memorable moments that build long-term loyalty while addressing friction points in the customer experience. Consider both digital and physical touchpoints where relevant.`
   }
-
   return (
-    <JourneyDisplay
-      journeySteps={journeySteps} // Add this
-      error={error}
-      loading={loading}
-      onSubmit={handleJourneySubmit}
-    />
+    <div className="w-full">
+      <JourneyDisplay
+        journeySteps={journeySteps}
+        error={error}
+        loading={loading}
+        onSubmit={handleJourneySubmit}
+      />
+    </div>
   )
 }

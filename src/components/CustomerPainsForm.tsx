@@ -7,7 +7,7 @@ interface CustomerPainsFormProps {
   loading: boolean
 }
 
-export default function CustomerPainsForm({
+export function CustomerPainsForm({
   onGenerate,
   loading,
 }: CustomerPainsFormProps) {
@@ -17,12 +17,17 @@ export default function CustomerPainsForm({
         <div>
           <h2 className="text-lg font-semibold">Customer Pain Points</h2>
           <p className="text-sm text-muted-foreground">
-            Generate pain points from a customer perspective.
+            Identify likely customer pain points at each journey step.
           </p>
         </div>
-        <Button onClick={onGenerate} disabled={loading} className="w-full">
+        <Button
+          type="submit"
+          onClick={onGenerate}
+          disabled={loading}
+          className=" bg-black text-white hover:bg-black/80"
+        >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {loading ? 'Generating...' : 'Generate Customer Pain Points'}
+          {loading ? 'Saving you time...' : 'Identify Customer Pain Points'}
         </Button>
       </div>
     </Card>

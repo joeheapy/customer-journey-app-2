@@ -21,7 +21,7 @@ export default function Home() {
             onJourneyGenerated={handleJourneyGenerated}
           />
         </section>
-        <section className="mt-8">
+        <section className="mt-2">
           <PainPointsContainer journeySteps={journeySteps} />
         </section>
       </div>

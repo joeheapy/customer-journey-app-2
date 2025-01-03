@@ -12,13 +12,13 @@ interface CustomerPainsDisplayProps {
   loading?: boolean
 }
 
-export default function CustomerPainsDisplay(props: CustomerPainsDisplayProps) {
+export function CustomerPainsDisplay(props: CustomerPainsDisplayProps) {
   const { painPoints = [], error = '', loading = false } = props
 
   if (loading) {
     return (
       <Card className="p-4">
-        <p>Generating pain points...</p>
+        <p></p>
       </Card>
     )
   }
@@ -35,27 +35,21 @@ export default function CustomerPainsDisplay(props: CustomerPainsDisplayProps) {
 
   return (
     <div className="mt-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex overflow-x-auto gap-4 pb-4">
         {painPoints.map((point, index) => (
-          <Card key={index} className="p-4">
-            <h3 className="font-medium mb-4">Journey Step {index + 1}</h3>
+          <Card key={index} className="p-4 flex-none w-[250px]">
+            <h3 className="font-medium mb-4 ">Step {index + 1}</h3>
             <div className="space-y-4">
               <div className="border-l-2 border-gray-200 pl-4">
-                <p className="text-sm font-medium text-gray-500">
-                  Pain Point 1
-                </p>
+                <p className="text-sm font-medium text-gray-500"></p>
                 <p className="mt-1">{point['customer-pain-1']}</p>
               </div>
               <div className="border-l-2 border-gray-200 pl-4">
-                <p className="text-sm font-medium text-gray-500">
-                  Pain Point 2
-                </p>
+                <p className="text-sm font-medium text-gray-500"></p>
                 <p className="mt-1">{point['customer-pain-2']}</p>
               </div>
               <div className="border-l-2 border-gray-200 pl-4">
-                <p className="text-sm font-medium text-gray-500">
-                  Pain Point 3
-                </p>
+                <p className="text-sm font-medium text-gray-500"></p>
                 <p className="mt-1">{point['customer-pain-3']}</p>
               </div>
             </div>

@@ -4,16 +4,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { JourneyFormData } from '@/lib/types'
+import { Loader2 } from 'lucide-react'
 
 interface JourneyFormProps {
   onSubmit: (formData: JourneyFormData) => Promise<void>
   isLoading?: boolean
 }
 
-export default function JourneyForm({
-  onSubmit,
-  isLoading = false,
-}: JourneyFormProps) {
+export function JourneyForm({ onSubmit, isLoading = false }: JourneyFormProps) {
   const [formData, setFormData] = useState<JourneyFormData>({
     target_customers: '',
     persona_name: '',
@@ -36,7 +34,7 @@ export default function JourneyForm({
     }
 
   return (
-    <Card className="w-full p-6">
+    <Card className="w-full p-4">
       <div className="space-y-6">
         <div>
           <h2 className="text-lg font-semibold">Customer Journey Generator</h2>
@@ -92,10 +90,11 @@ export default function JourneyForm({
           <div className="mt-6">
             <Button
               type="submit"
-              className="bg-black text-white hover:bg-black/80"
               disabled={isLoading}
+              className="bg-black text-white hover:bg-black/80"
             >
-              {isLoading ? 'Generating...' : 'Generate Journey'}
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? 'Saving you time...' : 'Generate Journey Steps'}
             </Button>
           </div>
         </form>

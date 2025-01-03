@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { JourneyStep } from '@/lib/types'
-import CustomerPainsForm from './CustomerPainsForm'
-import CustomerPainsDisplay from './CustomerPainsDisplay'
+import { CustomerPainsForm } from './CustomerPainsForm'
+import { CustomerPainsDisplay } from './CustomerPainsDisplay'
 
 interface PainPointsContainerProps {
   journeySteps?: JourneyStep[]
@@ -82,13 +82,15 @@ Do not return a title.`
   }
 
   return (
-    <div className="w-full space-y-8">
-      <CustomerPainsForm onGenerate={handleGeneratePains} loading={loading} />
-      <CustomerPainsDisplay
-        painPoints={painPoints}
-        error={error}
-        loading={loading}
-      />
+    <div className="w-[96%] md:w-[96%] mx-auto">
+      <div className="space-y-8">
+        <CustomerPainsForm onGenerate={handleGeneratePains} loading={loading} />
+        <CustomerPainsDisplay
+          painPoints={painPoints}
+          error={error}
+          loading={loading}
+        />
+      </div>
     </div>
   )
 }

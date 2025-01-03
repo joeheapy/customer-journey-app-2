@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Edit2, Save } from 'react-feather'
 import { JourneyStep } from '@/lib/types'
-import CustomerJourneyGenerator from '@/components/JourneyForm'
+import { JourneyForm } from '@/components/JourneyForm'
 import { JourneyFormData } from '@/lib/types'
 import CsvDownloadButton from './CsvDownloadButton'
 
@@ -25,7 +25,7 @@ interface EditingValues {
   description: string
 }
 
-export default function JourneyDisplay({
+export function JourneyDisplay({
   journeySteps,
   error,
   loading,
@@ -95,8 +95,8 @@ export default function JourneyDisplay({
   }
 
   return (
-    <main className="container mx-auto py-6 px-4">
-      <CustomerJourneyGenerator onSubmit={onSubmit} isLoading={loading} />
+    <main className="w-[96%] md:w-[96%] mx-auto">
+      <JourneyForm onSubmit={onSubmit} isLoading={loading} />
 
       {error && (
         <div className="mt-6">
@@ -115,21 +115,19 @@ export default function JourneyDisplay({
             {editableSteps.map((step) => (
               <Card key={step.step} className="p-4 flex-none w-[250px]">
                 <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    {step.isEditing ? (
-                      <Textarea
-                        value={editingValues[step.step]?.title ?? step.title}
-                        className="mb-2"
-                        onChange={(e) =>
-                          handleInputChange(step.step, 'title', e.target.value)
-                        }
-                      />
-                    ) : (
-                      <h3 className="font-medium">
-                        {step.step}: {step.title}
-                      </h3>
-                    )}
-                  </div>
+                  {step.isEditing ? (
+                    <Textarea
+                      value={editingValues[step.step]?.title ?? step.title}
+                      className="mb-2"
+                      onChange={(e) =>
+                        handleInputChange(step.step, 'title', e.target.value)
+                      }
+                    />
+                  ) : (
+                    <h3 className="font-medium">
+                      Step {step.step}: {step.title}
+                    </h3>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
