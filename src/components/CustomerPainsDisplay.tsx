@@ -1,43 +1,67 @@
 import { Card } from '@/components/ui/card'
 
-// Define the PainPoint interface or import it from types
 interface PainPoint {
-  step: number
-  title: string
-  description: string
+  'customer-pain-1': string
+  'customer-pain-2': string
+  'customer-pain-3': string
 }
 
 interface CustomerPainsDisplayProps {
-  painPoints?: PainPoint[] // Changed from CustomerPainPointData
+  painPoints?: PainPoint[]
   error?: string
+  loading?: boolean
 }
 
-export default function CustomerPainsDisplay({
-  painPoints = [],
-  error = '',
-}: CustomerPainsDisplayProps) {
-  if (!painPoints) return null
+export default function CustomerPainsDisplay(props: CustomerPainsDisplayProps) {
+  const { painPoints = [], error = '', loading = false } = props
+
+  if (loading) {
+    return (
+      <Card className="p-4">
+        <p>Generating pain points...</p>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-red-50 p-4">
+        <p className="text-red-600">{error}</p>
+      </Card>
+    )
+  }
+
+  if (!painPoints?.length) return null
 
   return (
     <div className="mt-8">
-      {error && (
-        <Card className="bg-red-50 p-4 mb-4">
-          <p className="text-red-600">{error}</p>
-        </Card>
-      )}
-
-      {painPoints.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {painPoints.map((point) => (
-            <Card key={point.step} className="p-4">
-              <h3 className="font-medium mb-2">
-                {point.step}. {point.title}
-              </h3>
-              <p className="text-gray-600">{point.description}</p>
-            </Card>
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {painPoints.map((point, index) => (
+          <Card key={index} className="p-4">
+            <h3 className="font-medium mb-4">Journey Step {index + 1}</h3>
+            <div className="space-y-4">
+              <div className="border-l-2 border-gray-200 pl-4">
+                <p className="text-sm font-medium text-gray-500">
+                  Pain Point 1
+                </p>
+                <p className="mt-1">{point['customer-pain-1']}</p>
+              </div>
+              <div className="border-l-2 border-gray-200 pl-4">
+                <p className="text-sm font-medium text-gray-500">
+                  Pain Point 2
+                </p>
+                <p className="mt-1">{point['customer-pain-2']}</p>
+              </div>
+              <div className="border-l-2 border-gray-200 pl-4">
+                <p className="text-sm font-medium text-gray-500">
+                  Pain Point 3
+                </p>
+                <p className="mt-1">{point['customer-pain-3']}</p>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }

@@ -1,23 +1,26 @@
 'use client'
 
 import { useState } from 'react'
-import { CustomerPainPointData } from '@/lib/types'
+import { JourneyStep } from '@/lib/types'
 import CustomerPainsForm from './CustomerPainsForm'
 import CustomerPainsDisplay from './CustomerPainsDisplay'
-import { JourneyStep } from '@/lib/types'
 
 interface PainPointsContainerProps {
   journeySteps?: JourneyStep[]
 }
 
+interface PainPoint {
+  'customer-pain-1': string
+  'customer-pain-2': string
+  'customer-pain-3': string
+}
+
 export default function PainPointsContainer({
   journeySteps = [],
 }: PainPointsContainerProps) {
-  const [painPoints, setPainPoints] = useState<CustomerPainPointData[]>([])
+  const [painPoints, setPainPoints] = useState<PainPoint[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  console.log('PainPointsContainer rendering', { painPoints, loading, error }) // Debug log
 
   const handleGeneratePains = async () => {
     setLoading(true)
@@ -52,7 +55,7 @@ export default function PainPointsContainer({
   }
 
   const createPrompt = () => {
-    console.log('Journey Steps:', journeySteps) // Debug journeySteps
+    console.log('Journey Steps:', journeySteps)
 
     if (!journeySteps?.length) {
       return `You are a customer experience expert. Please analyze general customer pain points.`
@@ -65,23 +68,27 @@ export default function PainPointsContainer({
       )
       .join('\n\n')
 
-    console.log('Steps Text:', stepsText) // Debug formatted steps
+    console.log('Steps Text:', stepsText)
 
     const prompt = `You are a customer experience expert. Here is the customer journey:
 
 ${stepsText}
 
-Based on this journey, identify two key customer pain point for each step in the journey, ensuring coverage of all journey steps.`
-    // For each pain point:Format the response as a numbered list of pain points, ensuring coverage of all journey steps.'`
+For each step in this journey, describe three potential problems customers might encounter.
+Do not return a title.`
 
-    console.log('Final Prompt:', prompt) // Debug final prompt
+    console.log('Final Prompt:', prompt)
     return prompt
   }
 
   return (
     <div className="w-full space-y-8">
       <CustomerPainsForm onGenerate={handleGeneratePains} loading={loading} />
-      <CustomerPainsDisplay painPoints={painPoints} error={error} />
+      <CustomerPainsDisplay
+        painPoints={painPoints}
+        error={error}
+        loading={loading}
+      />
     </div>
   )
 }

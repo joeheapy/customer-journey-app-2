@@ -7,9 +7,9 @@ interface RequestBody {
 }
 
 interface PainPoint {
-  step: number
-  title: string
-  description: string
+  'customer-pain-1': string
+  'customer-pain-2': string
+  'customer-pain-3': string
 }
 
 interface PainPointsData {
@@ -38,12 +38,12 @@ function isObject(value: unknown): value is Record<string, unknown> {
 function isPainPoint(point: unknown): point is PainPoint {
   if (!isObject(point)) return false
   return (
-    'step' in point &&
-    typeof point.step === 'number' &&
-    'title' in point &&
-    typeof point.title === 'string' &&
-    'description' in point &&
-    typeof point.description === 'string'
+    'customer-pain-1' in point &&
+    typeof point['customer-pain-1'] === 'string' &&
+    'customer-pain-2' in point &&
+    typeof point['customer-pain-2'] === 'string' &&
+    'customer-pain-3' in point &&
+    typeof point['customer-pain-3'] === 'string'
   )
 }
 
@@ -55,6 +55,11 @@ function validatePainPoints(data: unknown): data is PainPointsData {
   return painPointsData.painPoints.every(isPainPoint)
 }
 
+const createTimeoutPromise = (ms: number): Promise<never> =>
+  new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('OpenAI request timeout')), ms)
+  )
+
 export async function POST(req: Request) {
   try {
     if (!process.env.OPENAI_API_KEY) {
@@ -64,21 +69,7 @@ export async function POST(req: Request) {
       )
     }
 
-    if (!req.body) {
-      return NextResponse.json<ValidationError>(
-        { error: 'Missing request body' },
-        { status: 400 }
-      )
-    }
-
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout')), TIMEOUT_MS)
-    })
-
-    const body = (await Promise.race([
-      req.json(),
-      timeoutPromise,
-    ])) as RequestBody
+    const body = (await req.json()) as RequestBody
     if (!body.formattedPrompt?.trim()) {
       return NextResponse.json<ValidationError>(
         {
@@ -91,88 +82,112 @@ export async function POST(req: Request) {
 
     console.log('🤖 OpenAI Prompt:', body.formattedPrompt)
 
-    const openAiPromise = openai.chat.completions.create({
-      messages: [{ role: 'user', content: body.formattedPrompt }],
-      model: 'gpt-4',
-      temperature: 0.7,
-      max_tokens: 1000,
-      tools: [
-        {
-          type: 'function',
-          function: {
-            name: 'createPainPoints',
-            description: 'Create customer pain points',
-            parameters: {
-              type: 'object',
-              properties: {
-                painPoints: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      step: { type: 'number' },
-                      title: { type: 'string' },
-                      description: { type: 'string' },
+    try {
+      const openAiPromise = openai.chat.completions.create({
+        messages: [{ role: 'user', content: body.formattedPrompt }],
+        model: 'gpt-4',
+        temperature: 0.7,
+        max_tokens: 4000,
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'createPainPoints',
+              description: 'Create three customer pain points per journey step',
+              parameters: {
+                type: 'object',
+                properties: {
+                  painPoints: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        'customer-pain-1': { type: 'string' },
+                        'customer-pain-2': { type: 'string' },
+                        'customer-pain-3': { type: 'string' },
+                      },
+                      required: [
+                        'customer-pain-1',
+                        'customer-pain-2',
+                        'customer-pain-3',
+                      ],
                     },
-                    required: ['step', 'title', 'description'],
                   },
                 },
+                required: ['painPoints'],
               },
-              required: ['painPoints'],
             },
           },
+        ],
+        tool_choice: {
+          type: 'function',
+          function: { name: 'createPainPoints' },
         },
-      ],
-      tool_choice: { type: 'function', function: { name: 'createPainPoints' } },
-    })
+      })
 
-    const completion = (await Promise.race([
-      openAiPromise,
-      new Promise((_, reject) =>
-        setTimeout(
-          () => reject(new Error('OpenAI request timeout')),
-          TIMEOUT_MS
-        )
-      ),
-    ])) as ChatCompletion
+      const completion = await Promise.race<ChatCompletion>([
+        openAiPromise,
+        createTimeoutPromise(TIMEOUT_MS),
+      ])
 
-    console.log('📦 Raw OpenAI Response:', completion)
+      console.log(
+        '📦 Raw OpenAI Response:',
+        JSON.stringify(completion, null, 2)
+      )
 
-    const toolCall = completion.choices[0]?.message?.tool_calls?.[0]
-    if (!toolCall?.function?.arguments) {
-      throw new Error('Invalid response format from OpenAI')
+      const toolCall = completion.choices[0]?.message?.tool_calls?.[0]
+      if (!toolCall?.function?.arguments) {
+        throw new Error('Invalid response format from OpenAI')
+      }
+
+      console.log('🔧 Function Arguments:', toolCall.function.arguments)
+
+      const parsedData = JSON.parse(toolCall.function.arguments)
+      console.log('✨ Parsed Data:', JSON.stringify(parsedData, null, 2))
+
+      if (!validatePainPoints(parsedData)) {
+        throw new Error('Invalid pain points format')
+      }
+
+      const { painPoints } = parsedData
+      console.log(
+        '🎯 Validated Pain Points:',
+        JSON.stringify(painPoints, null, 2)
+      )
+
+      return NextResponse.json({ data: painPoints })
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'OpenAI request timeout') {
+          return NextResponse.json<ValidationError>(
+            {
+              error: 'Request timed out',
+              details: 'The OpenAI API took too long to respond',
+            },
+            { status: 504 }
+          )
+        }
+        if (error.message === 'Invalid pain points format') {
+          return NextResponse.json<ValidationError>(
+            {
+              error: error.message,
+              details: 'The response format was invalid',
+            },
+            { status: 422 }
+          )
+        }
+      }
+      throw error
     }
-
-    const parsedData = JSON.parse(toolCall.function.arguments)
-    console.log('✨ Parsed Data:', JSON.stringify(parsedData, null, 2))
-
-    if (!validatePainPoints(parsedData)) {
-      throw new Error('Invalid pain points format')
-    }
-
-    const { painPoints } = parsedData
-    console.log(
-      '🎯 Validated Pain Points:',
-      JSON.stringify(painPoints, null, 2)
-    )
-
-    return NextResponse.json({ data: painPoints })
   } catch (error) {
     console.error('API Error:', error)
-
-    if (error instanceof Error && error.message === 'Request timeout') {
-      return NextResponse.json<ValidationError>(
-        { error: 'Request timed out' },
-        { status: 504 }
-      )
-    }
-
     return NextResponse.json<ValidationError>(
       {
         error:
           error instanceof Error
             ? error.message
-            : 'Sorry. No customer pain points were generated. Please click the button to try again.',
+            : 'Failed to generate pain points',
+        details: 'Please try again',
       },
       { status: 500 }
     )
