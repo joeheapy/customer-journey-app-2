@@ -62,7 +62,9 @@ export async function POST(req) {
     const { journeySteps, responseTitle } = JSON.parse(functionCall.arguments)
     console.log('Parsed Journey Steps:', journeySteps)
     if (!journeySteps?.length) {
-      throw new Error('No journey steps in response')
+      throw new Error(
+        'Sorry. No journey steps were generated. Please click the button to try again.'
+      )
     }
 
     return NextResponse.json({

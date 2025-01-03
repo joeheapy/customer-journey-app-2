@@ -4,8 +4,15 @@ import { useState } from 'react'
 import { JourneyFormData, JourneyStep } from '@/lib/types'
 import JourneyDisplay from '@/components/JourneyDisplay'
 
-export default function JourneyContainer() {
-  const [journeySteps, setJourneySteps] = useState<JourneyStep[]>([])
+interface JourneyContainerProps {
+  onJourneyGenerated: (steps: JourneyStep[]) => void
+  journeySteps: JourneyStep[]
+}
+
+export default function JourneyContainer({
+  onJourneyGenerated,
+  journeySteps, // Add this
+}: JourneyContainerProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -29,7 +36,7 @@ export default function JourneyContainer() {
       }
 
       const { data } = await response.json()
-      setJourneySteps(data)
+      onJourneyGenerated(data) // Lift state up instead of setting locally
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
@@ -47,7 +54,7 @@ export default function JourneyContainer() {
 
   return (
     <JourneyDisplay
-      journeySteps={journeySteps}
+      journeySteps={journeySteps} // Add this
       error={error}
       loading={loading}
       onSubmit={handleJourneySubmit}
